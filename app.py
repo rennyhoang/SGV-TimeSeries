@@ -11,6 +11,7 @@ disp_file = './data/ifgram_recon_displacement.h5'
 mask_file = './data/mask_low_elevation_high_tempCoh.h5'
 plot_filename = None
 snapshot_filename = None
+coordinates = ""
 
 
 def readtimeseries(filepath):
@@ -57,7 +58,7 @@ def latlon2yx(lat, lon):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():  # put application's code here
-    global plot_filename, snapshot_filename
+    global plot_filename, snapshot_filename, coordinates
 
     if request.method == 'POST':
         if 'latitude' in request.form:
@@ -65,7 +66,7 @@ def index():  # put application's code here
             lat = float(request.form['latitude'])
             lon = float(request.form['longitude'])
             y, x = latlon2yx(lat, lon)
-            # print('Pixel location: ', y, x)
+            coordinates = "Pixel location: " + str(y) + ", " + str(x)
             ts_yx = dset_ts[:, y, x]
             fig, ax = plt.subplots(figsize=(8, 4))
             ax.scatter(dates, ts_yx, c='k', label='Sentinel-1')
@@ -76,7 +77,8 @@ def index():  # put application's code here
 
             return render_template('index.html',
                                    plot_filename=plot_filename,
-                                   snapshot_filename=snapshot_filename)
+                                   snapshot_filename=snapshot_filename,
+                                   coordinates=coordinates)
 
         elif 'date1' in request.form:
             dset_ts, dates = readtimeseries(ts_file)
@@ -93,12 +95,14 @@ def index():  # put application's code here
 
             return render_template('index.html',
                                    plot_filename=plot_filename,
-                                   snapshot_filename=snapshot_filename)
+                                   snapshot_filename=snapshot_filename,
+                                   coordinates=coordinates)
 
     # Render the form
     return render_template('index.html',
                            plot_filename=None,
-                           snapshot_filename=None)
+                           snapshot_filename=None,
+                           coordinates='')
 
 
 if __name__ == '__main__':
