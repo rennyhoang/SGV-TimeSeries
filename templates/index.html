@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>SGV Visualization</title>
+</head>
+<body>
+    <div class="content">
+        <div class="card">
+            <h1>SGV Time-Series</h1>
+            {% if plot_filename %}
+                <img src="{{ plot_filename }}" alt="Plot">
+            {% endif %}
+            <form method="post">
+                <div class="line">
+                    <label for="latitude">Latitude:</label>
+                    <input type="range" id="latitude" name="latitude" value="{{ request.form['latitude'] }}" min="33.5" max="34.4" step="0.01" required oninput="this.nextElementSibling.value = this.value + '°'">
+                    <output>{{ request.form['latitude'] }}°</output>
+                </div>
+                <div class="line">
+                    <label for="longitude">Longitude:</label>
+                    <input type="range" id="longitude" name="longitude" value="{{ request.form['longitude'] }}" min="-118.75" max="-117.25" step="0.01" required oninput="this.nextElementSibling.value = this.value + '°'">
+                    <output>{{ request.form['longitude'] }}°</output>
+                </div>
+                <button type="submit">Generate Plot</button>
+            </form>
+        </div>
+        <div class="card">
+            <h1>SGV Snapshot</h1>
+            {% if snapshot_filename %}
+                <img src="{{ snapshot_filename }}" alt="Snapshot">
+            {% endif %}
+            <form method="post">
+                <div class="line">
+                    <label for="date1">Initial Date:</label>
+                    <input type="date" id="date1" name="date1" value="{{ request.form['date1'] }}" required>
+                </div>
+                <div class="line">
+                    <label for="date2">End Date:</label>
+                    <input type="date" id="date2" name="date2" value="{{ request.form['date2'] }}" required>
+                </div>
+                <button type="submit">Generate Snapshot</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
