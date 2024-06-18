@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request
+from dateutil.parser import parse
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,6 +11,7 @@ app = Flask(__name__)
 ts_file = './data/sentinel_dvert_timeseries_median_filtered.h5'
 disp_file = './data/ifgram_recon_displacement.h5'
 mask_file = './data/mask_low_elevation_high_tempCoh.h5'
+well_file = './data/well_SanGabriel.txt'
 plot_filename = None
 snapshot_filename = None
 coordinates = ""
@@ -62,16 +65,37 @@ def index():  # put application's code here
 
     if request.method == 'POST':
         if 'latitude' in request.form:
+            # parse ts data
             dset_ts, dates = readtimeseries(ts_file)
             lat = float(request.form['latitude'])
             lon = float(request.form['longitude'])
             y, x = latlon2yx(lat, lon)
             coordinates = "Pixel location: " + str(y) + ", " + str(x)
             ts_yx = dset_ts[:, y, x]
-            fig, ax = plt.subplots(figsize=(8, 4))
-            ax.scatter(dates, ts_yx, c='k', label='Sentinel-1')
-            ax.set_xlabel('Date')
-            ax.set_ylabel('Displacement [m]')
+            # parse well data
+            rows = []
+            with open("data/well_SanGabriel.txt", "r") as csvfile:
+                csv_reader = csv.reader(csvfile)
+                fields = next(csv_reader)
+                for row in csv_reader:
+                    date = parse(row[0]).strftime('%Y-%m-%d')
+                    year = int(date[:4])
+                    measurement = row[1]
+                    if year >= 2015:
+                        rows.append((date, measurement))
+            well_dates = np.array([row[0] for row in rows])
+            well_dates = pd.to_datetime(well_dates)
+            measurements = np.array([float(row[1]) for row in rows])
+
+            # plot well/ts data
+            fig, ax1 = plt.subplots()
+            ax1.set_xlabel('Date')
+            ax1.set_ylabel('Displacement [m]')
+            ax1.scatter(dates, ts_yx, c='k')
+            ax2 = ax1.twinx()
+            ax2.set_ylabel('Measurement [mm]')
+            ax2.scatter(well_dates, measurements, c='c')
+            fig.tight_layout()
             plot_filename = "static/plot.png"
             fig.savefig(plot_filename, bbox_inches='tight')
 
@@ -88,6 +112,7 @@ def index():  # put application's code here
             idx1 = dates.get_loc(date1)
             idx2 = dates.get_loc(date2)
             disp_idx1_idx2 = dset_ts[idx2,] - dset_ts[idx1,]
+            disp_idx1_idx2 = [x[:50] for x in disp_idx1_idx2[:20]]
             plt.figure()
             plt.imshow(disp_idx1_idx2 * dset_mask, cmap='jet', vmin=-0.05, vmax=0.05)
             snapshot_filename = "static/snapshot.png"
