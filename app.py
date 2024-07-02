@@ -17,6 +17,22 @@ snapshot_filename = None
 coordinates = ""
 
 
+def averagetimeseries(dset, dates):
+    # iterate over all the times
+    res = []
+    for time in dset:
+        # average displacement over all x, y
+        total = 0
+        n = 0
+        for lat in time:
+            for measurement in lat:
+                total += measurement
+                n += 1
+        total /= n
+        res.append(total)
+    return np.array(res)
+
+
 def readtimeseries(filepath):
     # read the data
     f = h5py.File(filepath, 'r')
@@ -24,7 +40,6 @@ def readtimeseries(filepath):
     dset = np.array(dset)
     dates = [i.decode('utf8') for i in f['date'][:]]
     dates = pd.to_datetime(dates)
-    print(dates)
     f.close()
     return dset, dates
 
@@ -49,9 +64,9 @@ def readmask(filepath):
 
 def latlon2yx(lat, lon):
     # 33.50 34.4 -118.75 -117.25
-    lat0 = 34.1
-    lon0 = -118
-    step = 0.02277778
+    lat0 = 34.4
+    lon0 = -118.75
+    step = 0.002277778
 
     y = -int((lat - lat0) / step)
     x = int((lon - lon0) / step)
@@ -112,7 +127,6 @@ def index():  # put application's code here
             idx1 = dates.get_loc(date1)
             idx2 = dates.get_loc(date2)
             disp_idx1_idx2 = dset_ts[idx2,] - dset_ts[idx1,]
-            disp_idx1_idx2 = [x[:50] for x in disp_idx1_idx2[:20]]
             plt.figure()
             plt.imshow(disp_idx1_idx2 * dset_mask, cmap='jet', vmin=-0.05, vmax=0.05)
             snapshot_filename = "static/snapshot.png"
