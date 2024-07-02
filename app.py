@@ -121,6 +121,7 @@ def index():  # put application's code here
 
         elif 'date1' in request.form:
             dset_ts, dates = readtimeseries(ts_file)
+            print(dates)
             dset_mask = readmask(mask_file)
             date1 = str(request.form['date1'])
             date2 = str(request.form['date2'])

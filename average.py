@@ -18,6 +18,7 @@ def calculate_storage_loss(dset):
     # get storage loss
     total_diff = np.nan_to_num(dset[-1,] - dset[0,])
     total_change = np.trapezoid(np.trapezoid(total_diff, axis=1), axis=0)
+    print(total_diff)
     print(total_change)
 
 
@@ -63,7 +64,7 @@ def main():
     dset_ts, dates = readtimeseries(ts_file)
     dset_mask = readmask(mask_file)
     dset_ts *= dset_mask
-    # calculate_storage_loss(dset_ts)
+    calculate_storage_loss(dset_ts)
     averaged_dset = averagetimeseries(dset_ts, dates)
 
     # parse well data
