@@ -22,8 +22,8 @@ def calculate_storage_loss(dset, idx1, idx2):
 
     total = 0
     n = 0
-    for lat in diff[115:126]:
-        for measurement in lat[260:271]:
+    for lat in diff:
+        for measurement in lat:
             if np.isnan(measurement):
                 continue
             total += measurement
