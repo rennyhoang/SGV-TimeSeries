@@ -22,11 +22,13 @@ def calculate_storage_loss(dset, idx1, idx2):
 
     total = 0
     n = 0
-    for lat in diff:
-        for measurement in lat:
+    for lat in diff[115:126]:
+        for measurement in lat[260:271]:
             if np.isnan(measurement):
                 continue
             total += measurement
+            if measurement < 0:
+                print("hooray!")
             n += 1
     avg = total / n
     total_disp = avg * meters_to_acrefeet
@@ -48,10 +50,7 @@ def averagetimeseries(dset, dates):
                 total += measurement
                 n += 1
         total /= n if n != 0 else 1
-        if total > -0.01:
-            res.append(total)
-        else:
-            res.append(np.nan)
+        res.append(total)
     return np.array(res)
 
 
@@ -79,7 +78,8 @@ def main():
     dset_ts, dates = readtimeseries(ts_file)
     dset_mask = readmask(mask_file)
     dset_ts *= dset_mask
-    print(calculate_storage_loss(dset_ts, 351, 381))
+    print(dates[14], dates[42])
+    print(calculate_storage_loss(dset_ts, 14, 42))
     averaged_dset = averagetimeseries(dset_ts, dates)
 
     # parse well data
@@ -102,6 +102,7 @@ def main():
     fig.set_figwidth(10)
     ax1.set_xlabel("Time [y]", labelpad=10)
     ax1.set_ylabel("InSAR Displacement [m]", labelpad=0)
+    ax1.set_ylim(-0.01, 0.02)
     ax2 = ax1.twinx()
     ax2.set_ylabel("Well Measurement [mm]", labelpad=10)
 
@@ -135,12 +136,11 @@ def main():
     ax3.yaxis.set_major_formatter(StrMethodFormatter("{x:,}"))
     ax1.set_zorder(ax2.get_zorder() + 1)
     ax1.patch.set_visible(False)
-
     ax1.scatter(dates, averaged_dset, c="k", s=4, label="InSAR", zorder=10)
     line3 = ax3.bar(
         water_prod_dates,
         water_prod_vals,
-        width=300,
+        width=360,
         zorder=1000,
         align="edge",
         color="#ECE27D80",
