@@ -78,8 +78,6 @@ def main():
     dset_ts, dates = readtimeseries(ts_file)
     dset_mask = readmask(mask_file)
     dset_ts *= dset_mask
-    print(dates[14], dates[42])
-    print(calculate_storage_loss(dset_ts, 14, 42))
     averaged_dset = averagetimeseries(dset_ts, dates)
 
     # parse well data

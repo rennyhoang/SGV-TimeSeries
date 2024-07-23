@@ -17,10 +17,10 @@ def yx2latlon(y, x):
     # 33.50 34.4 -118.75 -117.25
     lat0 = 34.4
     lon0 = -118.75
-    step = 0.002277778
+    step = 0.00277778
 
-    lat = (-1 * y * step) + lat0
-    lon = (x * step) + lon0
+    lat = (y * step) + lat0
+    lon = (-1 * x * step) + lon0
 
     return lat, lon
 
